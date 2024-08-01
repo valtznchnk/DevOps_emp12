@@ -1,0 +1,32 @@
+---
+- hosts: localhost
+  tasks:
+    - name: Create Yandex Cloud instance
+      command: >
+        yc compute instance create
+        --name my-yc-instance-2
+        --network-interface subnet-name=my-yc-subnet-a,nat-ip-version=ipv4
+        --zone ru-central1-a
+        --ssh-key ~/.ssh/id_ed25519.pub
+      register: instance_creation
+
+    - name: Get public IP address
+      set_fact:
+        public_ip: "{{ instance_creation.network_interfaces[0].nat_ip_address }}"
+
+    - name: Ensure the hosts file exists
+      copy:
+        dest: /etc/ansible/hosts
+        content: |
+          [yc]
+        mode: '0644'
+      when: not lookup('file', '/etc/ansible/hosts', errors='ignore')|length
+
+    - name: Add the public IP address to the hosts file
+      lineinfile:
+        path: /etc/ansible/hosts
+        line: "{{ public_ip }}"
+        state: present
+        create: yes
+        group: yc
+      when: public_ip is defined

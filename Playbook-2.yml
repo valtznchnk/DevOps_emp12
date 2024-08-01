@@ -1,0 +1,21 @@
+---
+- name: Создание экземпляра Yandex Cloud и получение IP адреса
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Создание экземпляра Yandex Cloud
+      yandex.cloud.compute.instance:
+        name: my-yc-instance-2
+        zone: ru-central1-a
+        folder_id: b1gl3iani8oqt0tp1rli  # Замените на ваш folder_id
+        platform_id: standard-v1
+        network_interfaces:
+          - subnet_name: my-yc-subnet-a
+            nat_ip_version: ipv4
+        ssh_keys:
+          - ~/.ssh/id_ed25519.pub
+      register: instance_info
+
+    - name: Вывод внешнего IP адреса
+      debug:
+        msg: "Внешний IP адрес экземпляра: {{ instance_info.instance.network_interfaces[0].nat_ip }}"

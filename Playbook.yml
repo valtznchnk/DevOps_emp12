@@ -12,7 +12,7 @@
 
     - name: Get public IP address
       set_fact:
-        public_ip: "{{ instance_creation.instance.network_interfaces[0].nat_ip_address }}"
+        public_ip: "{{ instance_creation.network_interfaces[0].nat_ip_address }}"
 
     - name: Ensure the hosts file exists
       copy:
